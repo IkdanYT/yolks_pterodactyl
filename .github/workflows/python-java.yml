@@ -32,4 +32,4 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            ghcr.io/IkdanYT/yolks_pterodactyl:python-java_latest
+            ghcr.io/ikdanyt/yolks_pterodactyl:python-java_latest
