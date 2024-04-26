@@ -5,17 +5,27 @@ FROM python:3.11-slim-bookworm
 LABEL author="Michael Parker" maintainer="parker@pterodactyl.io"
 
 # Обновляем и устанавливаем необходимые пакеты как для Python, так и для Java.
-RUN apt update \
-    && apt -y install git gcc g++ ca-certificates dnsutils curl iproute2 ffmpeg procps tini fontconfig \
-    && apt install -y curl lsof ca-certificates openssl git tar sqlite3 zip unzip \
-    && apt clean
-
-# Добавляем PPA для Temurin, чтобы установить Java
-RUN mkdir -p /usr/share/man/man1 \
-    && apt-get update -y \
-    && apt-get install -y software-properties-common \
-    && apt-get update -y \
-    && apt-get install -y openjdk-8-jdk
+RUN apt-get update -y && apt-get install -y \
+    git \
+    gcc \
+    g++ \
+    ca-certificates \
+    dnsutils \
+    curl \
+    iproute2 \
+    ffmpeg \
+    procps \
+    tini \
+    fontconfig \
+    lsof \
+    openssl \
+    tar \
+    sqlite3 \
+    zip \
+    unzip \
+    default-jdk \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
 
 # Создаем пользователя 'container'
 RUN useradd -m -d /home/container container
@@ -32,9 +42,12 @@ STOPSIGNAL SIGINT
 COPY --chown=container:container entrypoint-python.sh /entrypoint-python.sh
 COPY --chown=container:container entrypoint-java.sh /entrypoint-java.sh
 
+# Даем разрешения на исполнение entrypoint скриптам
+RUN chmod +x /entrypoint-python.sh && chmod +x /entrypoint-java.sh
+
 # Entry point и комманду CMD нам нужно будет объединять во время выполнения контейнера
-ENTRYPOINT ["/usr/bin/tini", "-g", "--"]
+ENTRYPOINT ["/usr/bin/tini", "--"]
 
 # Следующие строки - это пример, который запускает первый скрипт, а затем второй. 
-# Это может быть не то, что вам нужно в зависимости от использования.
+# Это можно адаптировать в зависимости от потребностей.
 CMD ["/bin/bash", "-c", "/entrypoint-python.sh && /entrypoint-java.sh"]
